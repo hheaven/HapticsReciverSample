@@ -5,13 +5,17 @@ from PIL import Image
 
 import PrintWindow
 import HapticsReciverBlock
+import HapticsReciverCode128
 
 
 
 #
 def main():
     #
-    rb = HapticsReciverBlock.HapticsReciverBlock( area = ( 8, 1 ), threshold = 8 )
+    reciver = HapticsReciverBlock.HapticsReciverBlock( area = ( 8, 1 ), threshold = 8 )
+    # reciver = HapticsReciverCode128.HapticsReciverCode128( area = ( 1, 8 ), one_block = ( 256, 4 ) )
+
+    print( type( reciver ) )
 
     #
     window_name = "VRChat"
@@ -34,7 +38,7 @@ def main():
             hwnd    = None
             continue
 
-        capture_rect    = rb.rect( client_rect )
+        capture_rect    = reciver.rect( client_rect )
 
         #
         bmp = PrintWindow.printWindow( hwnd, capture_rect )
@@ -56,16 +60,23 @@ def main():
         img = img.crop( ( margin[ 0 ], margin[ 1 ], w, h ) )
         # img.save( "test1.bmp" )
 
-        # 処理サイズに拡大縮小
-        img = img.resize( ( rb.block_area[ 0 ] * HapticsReciverBlock.BLOCK_SIZE, rb.block_area[ 1 ] * HapticsReciverBlock.BLOCK_SIZE ), Image.NEAREST )
-        # img.save( "test2.bmp" )
+
+        if type( reciver ) == HapticsReciverBlock.HapticsReciverBlock:
+            # 処理サイズに拡大縮小
+            img = img.resize( ( reciver.block_area[ 0 ] * HapticsReciverBlock.BLOCK_SIZE, reciver.block_area[ 1 ] * HapticsReciverBlock.BLOCK_SIZE ), Image.NEAREST )
+            # img.save( "test2.bmp" )
 
 
-        # 画像データから値を更新
-        rb.update( img.getdata() )
+            # 画像データから値を更新
+            reciver.update( img.getdata() )
+
+        else:
+            # 画像データから値を更新
+            reciver.update( img )
+
 
         #
-        print( rb.value )
+        print( reciver.value )
 
         time.sleep( 0.1 )
 
